@@ -1,0 +1,31 @@
+PLINK v1.90b6.20 64-bit (21 Sep 2020)
+Options in effect:
+  --bfile CHR1_Task_Renamed
+  --ci 0.95
+  --covar Phenotype.txt
+  --covar-name age, gender, PC1, PC2
+  --linear
+  --out LR
+  --pheno Phenotype.txt
+  --pheno-name Phenotype
+
+Hostname: Alis-Air.fritz.box
+Working directory: /Users/Muhammad_Ali/Downloads/WUSTL_Tasks/Task13_linearRegression
+Start time: Thu Oct 15 14:11:52 2020
+
+Random number seed: 1602763912
+8192 MB RAM detected; reserving 4096 MB for main workspace.
+244670 variants loaded from .bim file.
+2142 people (1193 males, 949 females) loaded from .fam.
+2125 phenotype values present after --pheno.
+Using 1 thread (no multithreaded calculations invoked).
+--covar: 4 out of 5 covariates loaded.
+6 people had missing value(s), and 17 people were not seen in the covariate file.
+Before main variant filters, 2135 founders and 7 nonfounders present.
+Calculating allele frequencies... done.
+Total genotyping rate is 0.994741.
+244670 variants and 2142 people pass filters and QC.
+Phenotype data is quantitative.
+Writing linear model association results to LR.assoc.linear ... done.
+
+End time: Thu Oct 15 14:12:39 2020

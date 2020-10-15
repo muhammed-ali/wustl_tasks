@@ -1,0 +1,5 @@
+Task 13
+The files CHR1_Task_Renamed bim/bed/fam contain genotype information for more than 2000 individuals
+The file Phenotype.txt contains the phenotype information needed for the analyses.
+
+Perform a linear regression adjusted by age, gender and the first two principal components. Report lowest p value for the analyses with the effect and the 95% confident intervals
