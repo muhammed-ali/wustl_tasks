@@ -1,6 +1,6 @@
 # NOTE: First rename some of the genes which have been converted to 1-Mar, 2-Mar.. ect. due to opening/saving the provided count data file in excel.
 
-setwd("/Users/Muhammad_Ali/Downloads/WUSTL_Tasks/Task9_DESeq2")
+# setwd("/path/where/input/files/are/present/")
 
 suppressMessages(library(DESeq2))
 suppressMessages(library(shiny))
@@ -8,8 +8,9 @@ suppressMessages(library(shiny))
 counts <- read.table("mayo.path_aging.con.salmon.gene.counts.txt", sep="\t", header=T, row.names=1, check.names = FALSE, stringsAsFactors=F)
 pheno <- read.csv("mayo.path_aging.con.phenotype.csv", sep=",", header=T, stringsAsFactors=F)
 padj_threshold <- 0.05
+pval_threshold <- 0.05
 
-writeLines(paste("Input files read for conducting DEA"))
+writeLines(paste("Input files are read for conducting DEA"))
 
 # sanity check
 identical(colnames(counts), pheno$UID) # TRUE
@@ -38,7 +39,7 @@ summary(res)
 writeLines(paste("No.of significant (padj < 0.05) DEGs: "))
 sum(res$padj < padj_threshold, na.rm=TRUE) # 3224
 writeLines(paste("No.of nominal (pvalue < 0.05) DEGs: "))
-sum(res$pvalue < padj_threshold, na.rm=TRUE) # 7029
+sum(res$pvalue < pval_threshold, na.rm=TRUE) # 7029
 res <- res[order(res$padj),]
 write.table(res, file="diffExp_DESeq2_complete.txt", sep="\t", quote=F, row.names=F)
 
@@ -60,7 +61,6 @@ writeLines(paste("DEA is complete, now running the shinny app script"))
 
 # R Shiny app script to show the boxplot of differentially expressed genes (DEG) and table of DE result
 
-suppressMessages(library(shiny))
 load("ShinyApp_Input.RData")
 DEGs <- row.names(de_result)
 

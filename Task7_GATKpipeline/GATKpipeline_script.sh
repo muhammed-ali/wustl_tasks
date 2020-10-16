@@ -14,6 +14,8 @@ mv $task6_dir/Sample*/*.sam $task7_dir
 cd ${task7_dir}
 
 # convert SAM to BAM
+# In order to save space and make it easy for softwares to hand the large alignments files, 
+# we convert SAM files to a binary format called BAM.
 for i in *.sam; do name=$(echo $i | cut -d "." -f 1); bam='.bam'; samtools view -bS $i > $name$bam; done
 
 # sort the BAM files
@@ -22,16 +24,21 @@ for i in *.bam; do name=$(echo $i | cut -d "." -f 1); bam='_sorted.bam'; samtool
 # create the BAM files indexes
 for i in *_sorted.bam; do name=$(echo $i | cut -d "." -f 1); samtools index $i; done
 
-# calculate flagstat for every aligned file in the directory. This will provide you the alignment statistics for each sample
+# calculate flagstat for every aligned file in the directory. 
+# This will provide you the alignment statistics for each sample.
+# for example, how many reads are there in the dataset, and how many of them properly aligned to the reference genome.
 mkdir -p flagstat_results
 for i in *_sorted.bam; do name=$(echo $i | cut -d "_" -f 1); stat='_stats.txt'; samtools flagstat $i > ./flagstat_results/$name$stat; done
 
 # check the mapping quality
+# This tool provides the basic statistics of the alignment (number of reads, coverage, GC-content, etc.), 
+# also a number of useful graphs are produced.
 mkdir -p qualimap_results
 for i in *_sorted.bam; do name=$(echo $i | cut -d "_" -f 1); result='_result.pdf'; qualimap bamqc -nt 8 -bam $i -outfile ./qualimap_results/$name$result; done
 
 
 # mark duplicates
+# Potential PCR duplicates are marked with Picard Tools
 for i in *_sorted.bam
  do \ 
  	name=$(echo $i | cut -d "." -f 1) \ 
@@ -43,7 +50,9 @@ for i in *_sorted.bam
  done
 
 
-# add Groups
+# add or replace read groups
+# The GATK pipeline requires read group information in BAM files. This information is used to differentiate samples 
+# and to detect artifacts associated with sequencing techniques.
 for i in *_sorted_markDupl.bam
 do \ 
 	name=$(echo $i | cut -d "." -f 1) \ 
@@ -63,6 +72,9 @@ for i in *_sorted_markDupl_readgroup.bam; do name=$(echo $i | cut -d "." -f 1); 
 
 
 # realign Indels
+# The local realignment process is designed to locally realign reads such that the 
+# number of mismatching bases is minimized across all the reads.
+# The first step is to determine suspicious intervals which are likely in need of realignment by using RealignerTargetCreator.
 for i in *_sorted_markDupl_readgroup.bam
 do \ 
 	name=$(echo $i | cut -d "." -f 1) \ 
@@ -76,8 +88,9 @@ do \
 done
 
 
-# rerform realignment
-for i in *_sorted_duplMarked_readgroup.bam
+# perform realignment
+# The second step is to run the realigner over the intervals determined in previous step.
+for i in *_sorted_markDupl_readgroup.bam
 do \ 
 	name=$(echo $i | cut -d "." -f 1) \ 
 	realigned='_realigned.bam' \ 
@@ -91,7 +104,8 @@ done
 
 
 # generate GVCF files
-for i in *_sorted_duplMarked_readgroup_realigned.bam
+# The BAM files are ready now to be processed with the GATK to obtain the genotype data.
+for i in *_sorted_markDupl_readgroup_realigned.bam
 do \ 
 	name=$(echo $i | cut -d "." -f 1) \ 
 	gvcf='.g.vcf' \ 
@@ -105,15 +119,18 @@ done
 
 
 # genotype all GVCF files
+# Use the GenotypeGVCFs in the GATK to genotype all GVCF files. 
+# It is necessary because estimation of some population genetics statistics require scaling by a total number of sites.
 java -Xmx8g -jar $GATK_path -T GenotypeGVCFs -R $refGenome \ 
--V sample1_sorted_duplMarked_readgroup_realigned.g.vcf \ 
--V sample2_sorted_duplMarked_readgroup_realigned.g.vcf \ 
--V sample3_sorted_duplMarked_readgroup_realigned.g.vcf \ 
+-V sample1_sorted_markDupl_readgroup_realigned.g.vcf \ 
+-V sample2_sorted_markDupl_readgroup_realigned.g.vcf \ 
+-V sample3_sorted_markDupl_readgroup_realigned.g.vcf \ 
 -O GVCFall.vcf
 
 
-# check quality of GVCF files
-gatk VariantEval -R $refGenome -O GVCFall.eval.grp --eval GVCFall.vcf
+# check quality of GVCF file
+# Given a variant callset, the VariantEval calculates various quality control metrics.
+java -Xmx8g -jar $GATK_path VariantEval -R $refGenome -O GVCFall.eval.grp --eval GVCFall.vcf
 
 echo "GATK pipeline executed successfully"
 
