@@ -4,10 +4,10 @@ This repository contains the necessary scripts (and most of the input files) for
 
 Every sub-directory contains the files relevant to a particular task, which include:  
 
-### a README file  
++ a README file  
 
-### script(s)  
++ script(s)  
 
-### input files (if they are not large enough e.g. Task 13)  
++ input files (if they are not large enough e.g. Task 13)  
 
-### results and/or intermediate file(s)  
++ results and/or intermediate file(s)  
